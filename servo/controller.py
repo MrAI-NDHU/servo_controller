@@ -5,7 +5,8 @@ from typing import Dict, List
 
 from servo import Servo
 
-
+# MG995 servo0: 150 510 60
+# MG995 servo1: 180 630 60
 class ControllerForPCA9685:
     def __init__(self, servos: Dict[object, Servo], chs: Dict[object, int],
                  pwm_freq: float, init_angles: Dict[object, float] = None):
@@ -30,7 +31,6 @@ class ControllerForPCA9685:
         self.pca9685 = PCA9685.PCA9685()
         self.pca9685.set_pwm_freq(self.pwm_freq)
         for k in servos:
-            self.servos[k].pwm_freq = self.pwm_freq
             self.pca9685.set_pwm(self.chs[k], 0, int(round(
                 self.servos[k].angle_to_pwm_val(self.init_angles[k]))))
             time.sleep(self.servos[k].wait_time(self.servos[k].angle_max))

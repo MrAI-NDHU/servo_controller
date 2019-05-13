@@ -8,8 +8,8 @@ import imutils
 import RPi.GPIO as GPIO
 from imutils.video import FPS, VideoStream
 
-from servo.sg90 import SG90
-from servo.controller import Controller
+from servo import Servo
+from servo.controller import ControllerForRPi
 
 logging.basicConfig(stream=sys.stdout, level=logging.INFO)
 GPIO.setwarnings(False)
@@ -45,10 +45,10 @@ GPIO.setup(LED_PIN, GPIO.OUT)
 GPIO.output(LED_PIN, GPIO.HIGH)
 
 # Setup Pan-Tilt
-sg90 = SG90(duty_cycle_err=0.3)
+sg90 = Servo(0.0, 180.0, 2.8, 12.8, 50.0, 0.003)
 servos = {PAN: sg90, TILT: sg90}
 pins = {PAN: PAN_PIN, TILT: TILT_PIN}
-c = Controller(servos, pins)
+c = ControllerForRPi(servos, pins)
 c.start([PAN, TILT])
 
 
