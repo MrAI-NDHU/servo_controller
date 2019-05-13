@@ -6,12 +6,9 @@ from typing import Dict, List
 from servo import Servo
 
 
-# sg90 0.0 180.0 2.5 12.5 0.003
-
-
 class ControllerForPCA9685:
     def __init__(self, servos: Dict[object, Servo], chs: Dict[object, int],
-                 init_angles: Dict[object, float] = None):
+                 pwm_freq: float, init_angles: Dict[object, float] = None):
         import Adafruit_PCA9685 as PCA9685
         
         if list(servos.keys()).sort() != list(chs.keys()).sort():
@@ -24,13 +21,16 @@ class ControllerForPCA9685:
         
         self.servos = servos
         self.chs = chs
+        self.pwm_freq = pwm_freq
         self.init_angles = {k: servos[k].fix_angle(v)
                             for k, v in init_angles.items()}
         self.current_angles = self.init_angles.copy()
         
         PCA9685.software_reset()
         self.pca9685 = PCA9685.PCA9685()
+        self.pca9685.set_pwm_freq(self.pwm_freq)
         for k in servos:
+            self.servos[k].pwm_freq = self.pwm_freq
             self.pca9685.set_pwm(self.chs[k], 0, int(round(
                 self.servos[k].angle_to_pwm_val(self.init_angles[k]))))
             time.sleep(self.servos[k].wait_time(self.servos[k].angle_max))
