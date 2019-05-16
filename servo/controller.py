@@ -5,8 +5,7 @@ from typing import Dict, List
 
 from servo import Servo
 
-# MG995 servo0: 150 510 60
-# MG995 servo1: 180 630 60
+
 class ControllerForPCA9685:
     def __init__(self, servos: Dict[object, Servo], chs: Dict[object, int],
                  pwm_freq: float, init_angles: Dict[object, float] = None):
@@ -15,7 +14,7 @@ class ControllerForPCA9685:
         if list(servos.keys()).sort() != list(chs.keys()).sort():
             raise ValueError
         if init_angles is None:
-            init_angles = {k: (v.angle_min + v.angle_max) / 2
+            init_angles = {k: (v.angle_min_deg + v.angle_max_deg) / 2
                            for k, v in servos.items()}
         elif list(servos.keys()).sort() != list(init_angles.keys()).sort():
             raise ValueError
@@ -33,7 +32,7 @@ class ControllerForPCA9685:
         for k in servos:
             self.pca9685.set_pwm(self.chs[k], 0, int(round(
                 self.servos[k].angle_to_pwm_val(self.init_angles[k]))))
-            time.sleep(self.servos[k].wait_time(self.servos[k].angle_max))
+            time.sleep(self.servos[k].wait_time(self.servos[k].angle_max_deg))
     
     def rotate(self, angles: Dict[object, float], is_relative: bool):
         for k, angle in angles.items():
@@ -60,7 +59,7 @@ class ControllerForRPi:
         if list(servos.keys()).sort() != list(pins.keys()).sort():
             raise ValueError
         if init_angles is None:
-            init_angles = {k: (v.angle_min + v.angle_max) / 2
+            init_angles = {k: (v.angle_min_deg + v.angle_max_deg) / 2
                            for k, v in servos.items()}
         elif list(servos.keys()).sort() != list(init_angles.keys()).sort():
             raise ValueError
@@ -91,7 +90,8 @@ class ControllerForRPi:
                 init_duty_cycle \
                     = self.servos[k].angle_to_pwm_val(self.init_angles[k])
                 self.pwms[k].start(init_duty_cycle)
-                time.sleep(self.servos[k].wait_time(self.servos[k].angle_max))
+                time.sleep(
+                    self.servos[k].wait_time(self.servos[k].angle_max_deg))
                 self.active_servos.add(k)
                 started.add(k)
         if len(started) > 0:
